@@ -35,6 +35,13 @@ IMGUI_IMPL_API void     ImGui_ImplOpenGL3_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplOpenGL3_NewFrame();
 IMGUI_IMPL_API void     ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data);
 
+#ifdef IMGUI_IMPL_OPENGL_PROC_ADDRESS_LOADER
+typedef void (*GL3WglProc)(void);
+typedef GL3WglProc (*GL3WGetProcAddressProc)(const char *proc);
+
+IMGUI_IMPL_API void     ImGui_ImplOpenGL3_SetProcAddrFunc(GL3WGetProcAddressProc procAddrFunc);
+#endif
+
 // (Optional) Called by Init/NewFrame/Shutdown
 IMGUI_IMPL_API bool     ImGui_ImplOpenGL3_CreateFontsTexture();
 IMGUI_IMPL_API void     ImGui_ImplOpenGL3_DestroyFontsTexture();

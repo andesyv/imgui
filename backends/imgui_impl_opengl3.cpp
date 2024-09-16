@@ -151,7 +151,7 @@
 #endif
 #include <GLES2/gl2ext.h>
 #endif
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
+#elif defined(IMGUI_IMPL_OPENGL_ES3) && !defined(IMGUI_IMPL_OPENGL_PROC_ADDRESS_LOADER)
 #if (defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_TV))
 #include <OpenGLES/ES3/gl.h>    // Use GL ES 3
 #else
@@ -283,6 +283,12 @@ bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
     // Initialize our loader
 #if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3) && !defined(IMGUI_IMPL_OPENGL_LOADER_CUSTOM)
     if (imgl3wInit() != 0)
+    {
+        fprintf(stderr, "Failed to initialize OpenGL loader!\n");
+        return false;
+    }
+#elif defined(IMGUI_IMPL_OPENGL_PROC_ADDRESS_LOADER)
+    if (imgl3wInit2(get_proc) != 0)
     {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return false;
@@ -662,6 +668,13 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
     glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
     (void)bd; // Not all compilation paths use this
 }
+
+#ifdef IMGUI_IMPL_OPENGL_PROC_ADDRESS_LOADER
+void ImGui_ImplOpenGL3_SetProcAddrFunc(GL3WGetProcAddressProc procAddrFunc)
+{
+    gl_get_proc_address = procAddrFunc;
+}
+#endif
 
 bool ImGui_ImplOpenGL3_CreateFontsTexture()
 {

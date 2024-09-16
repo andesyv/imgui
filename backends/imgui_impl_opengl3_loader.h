@@ -614,7 +614,7 @@ extern "C" {
 
 #define GL3W_ARRAY_SIZE(x)  (sizeof(x) / sizeof((x)[0]))
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(IMGUI_IMPL_OPENGL_PROC_ADDRESS_LOADER)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
@@ -661,6 +661,16 @@ static GL3WglProc get_proc(const char *proc)
     GL3WglProc res;
     *(void **)(&res) = dlsym(libgl, proc);
     return res;
+}
+#elif defined(IMGUI_IMPL_OPENGL_PROC_ADDRESS_LOADER)
+static GL3WGetProcAddressProc gl_get_proc_address;
+
+static GL3WglProc get_proc(const char* proc)
+{
+    if (!gl_get_proc_address)
+        return NULL;
+
+    return gl_get_proc_address(proc);
 }
 #else
 #include <dlfcn.h>
@@ -809,10 +819,12 @@ static void load_procs(GL3WGetProcAddressProc proc);
 
 int imgl3wInit(void)
 {
+#if !defined(IMGUI_IMPL_OPENGL_PROC_ADDRESS_LOADER)
     int res = open_libgl();
     if (res)
         return res;
     atexit(close_libgl);
+#endif
     return imgl3wInit2(get_proc);
 }
 
